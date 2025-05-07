@@ -36,17 +36,8 @@ function getWordAt(text, offset) {
     if (left === -1) return '';
     return text.slice(left, offset + (right === -1 ? text.length : right)).trim();
   }
-window.addEventListener('load', () => {
-  ; (async function () {
-    if (navigator.onLine === false) return;
-    if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.register('./sw.js');
-      reg.update();
-    }
-  }()).catch(() => {
-    // Service Worker may be rejected due to not supported, privacy setting, ect.
-  });
-  // 在页面加载后添加获取鼠标位置单词并复制到剪贴板的逻辑
+
+function setCopy(){
   const midDiv = document.querySelector('article div');
 
   if (midDiv) {
@@ -76,6 +67,20 @@ window.addEventListener('load', () => {
       }
     });
   }
+}
+window.addEventListener('load', () => {
+  ; (async function () {
+    if (navigator.onLine === false) return;
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      reg.update();
+    }
+  }()).catch(() => {
+    // Service Worker may be rejected due to not supported, privacy setting, ect.
+  });
+  setTimeout(() => {
+    setCopy();
+  },3000)
 });
 
 if ('serviceWorker' in navigator) {
