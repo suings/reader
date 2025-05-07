@@ -30,7 +30,12 @@ const router = (async function () {
   }, '/');
   return router;
 });
-
+function getWordAt(text, offset) {
+    const left = text.slice(0, offset).search(/\b\w+$/);
+    const right = text.slice(offset).search(/\W/);
+    if (left === -1) return '';
+    return text.slice(left, offset + (right === -1 ? text.length : right)).trim();
+  }
 window.addEventListener('load', () => {
   ; (async function () {
     if (navigator.onLine === false) return;
@@ -41,6 +46,36 @@ window.addEventListener('load', () => {
   }()).catch(() => {
     // Service Worker may be rejected due to not supported, privacy setting, ect.
   });
+  // 在页面加载后添加获取鼠标位置单词并复制到剪贴板的逻辑
+  const midDiv = document.querySelector('article div');
+
+  if (midDiv) {
+    midDiv.addEventListener('mousedown', event => {
+      event.preventDefault();  // 阻止默认行为
+      event.stopPropagation(); // 阻止冒泡
+
+      // 获取鼠标点击位置的文字
+      const range = document.caretRangeFromPoint(event.clientX, event.clientY);
+      if (range && range.startContainer.nodeType === Node.TEXT_NODE) {
+        const text = range.startContainer.textContent;
+        const offset = range.startOffset;
+        const word = getWordAt(text, offset);
+        
+        // 输出获取到的单词
+        console.log("点击到的单词：", word);
+
+        // 如果有获取到单词，复制到剪贴板
+        if (word) {
+          // 使用浏览器的剪贴板API复制单词
+          navigator.clipboard.writeText(word).then(() => {
+            console.log('已复制到剪贴板:', word);
+          }).catch(err => {
+            console.error('复制失败:', err);
+          });
+        }
+      }
+    });
+  }
 });
 
 if ('serviceWorker' in navigator) {
